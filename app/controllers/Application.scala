@@ -10,10 +10,20 @@ import java.text.SimpleDateFormat
 import play.api.data._
 import play.api.data.Forms._
 
+import play.api.libs.ws.WS
+
 object Application extends Controller {
-
-
+  
+  
+  def createMap = Action{
+   Redirect(routes.Application.tasks) 
+  }
+  
+ 
+  
   def index = Action {
+    
+    println ("Action Index")
     Redirect(routes.Application.tasks)
   }
 
