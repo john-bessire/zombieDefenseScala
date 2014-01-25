@@ -1,7 +1,4 @@
-Last year a created a repository called ZombieDefence to practice Ruby on Rails. This repository is
- to help me learn Play Framework with scala. PostgreSQL with geocoding will be used to map 
- the zombie outbreaks. Then I will have a chance to test if direct REST connections from a 
- mobile device are faster than sockets.
+Last year a created a repository called ZombieDefence to practice Ruby on Rails. This repository is to help me learn Play Framework with scala. PostgreSQL with geocoding will be used to map the zombie outbreaks. Then I will have a chance to test if direct REST connections from a mobile device are faster than sockets.
  
  Currently there is nothing worth downloading:
  1) Added TodDo List tutorial with Postgresql database
