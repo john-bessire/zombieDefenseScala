@@ -1,16 +1,15 @@
 package controllers
 
 import models.Task
-
 import play.api._
 import play.api.mvc._
 import java.util.Calendar
 import java.text.SimpleDateFormat
-
 import play.api.data._
 import play.api.data.Forms._
-
 import play.api.libs.ws.WS
+import models.Task
+import models.Geolocation
 
 object Application extends Controller {
   
@@ -18,9 +17,7 @@ object Application extends Controller {
   def createMap = Action{
    Redirect(routes.Application.tasks) 
   }
-  
- 
-  
+   
   def index = Action {
     
     println ("Action Index")
@@ -49,6 +46,17 @@ object Application extends Controller {
   val taskForm = Form(
     "label" -> nonEmptyText
   )
+  
+  def getLocation = Action {
+	  println("Get Location called")  
+	  
+	  Geolocation.fetchLatitudeAndLongitude("Mountain View, Ca")
+
+      
+      println("After function called to get longitide and latitude")
+      
+	  Redirect(routes.Application.tasks)
+  }
  
   
   def test = TODO

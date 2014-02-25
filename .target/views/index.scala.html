@@ -20,12 +20,14 @@
     
     <h2>Add a new task</h2>
     
-
-    
+   
     @form(routes.Application.newTask) {
         
         @inputText(taskForm("label")) 
-        
+        @inputText(taskForm("Location of Zombie outbreak")) 
+        @inputText(taskForm("Estimated number of zombies")) 
+  
+       
         <input type="submit" value="Create">
         
     }
