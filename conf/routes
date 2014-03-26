@@ -5,6 +5,9 @@
 # Home page
 GET     /                           controllers.Application.index
 
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               		controllers.Assets.at(path="/public", file)
+
 GET 	/test						controllers.Application.test
 
 GET     /tasks                  controllers.Application.tasks
@@ -12,3 +15,14 @@ POST    /tasks                  controllers.Application.newTask
 POST    /tasks/:id/delete       controllers.Application.deleteTask(id: Long)
 POST    /createMap				controllers.Application.createMap
 GET     /location               controllers.Application.getLocation
+
+GET     /users                  controllers.Users.listAllUsers
+POST    /users          		controllers.Users.createUser
+GET		/users/:id				controllers.Users.byId(id: Long)
+
+
+
+#GET		/api/v1/users								controllers.Users.allUsers
+#POST	/api/v1/users								controllers.Users.createUser
+#GET		/api/v1/users/:id							controllers.Users.byId(id: Long)
+#POST	/api/v1/users/profile						controllers.Users.createUserProfile

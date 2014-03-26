@@ -24,9 +24,17 @@ object Application extends Controller {
     Redirect(routes.Application.tasks)
   }
 
+  
+  def users = Action {
+	  Ok(views.html.index(Task.all(), taskForm))
+    
+  }
+  
   def tasks = Action {
     Ok(views.html.index(Task.all(), taskForm))
   }
+  
+  
 
   def newTask = Action { implicit request =>
     taskForm.bindFromRequest.fold(
@@ -45,6 +53,10 @@ object Application extends Controller {
 
   val taskForm = Form(
     "label" -> nonEmptyText
+  )
+  
+  val createUserForm = Form(
+      "label" -> nonEmptyText
   )
   
   def getLocation = Action {
