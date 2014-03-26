@@ -79,14 +79,12 @@ object User {
 		val password  = user.password
 		val human     = user.human
 		
-
-		var results = DB.withConnection { implicit connection =>
-	      	SQL(	
+		DB.withConnection { implicit connection =>
+	      	SQL(	      	    
      			"""
 	      			INSERT INTO users (created, last_active, last_login, user_name, email, password, human ) 
 	      			VALUES ('1999-01-08','1999-01-08','1999-01-08', {userName}, {email}, {password}, {human})
-	      	    """
-	      	
+	      	    """	      	
       		).on(
       			'userName   -> user.userName,
       			'email 	    -> user.email,
@@ -97,14 +95,34 @@ object User {
       		
     	} match {
 	        case Some(long) => new Id[Long](long) // The Primary Key
-	        case None       => throw new Exception("SQL Error - Did not insert User.")
-	        
+	        case None       => throw new Exception("SQL Error - Did not insert User.")	        
     	}
-    	
-    	// TODO - catch error PSQLException: ERROR: duplicate key value violates unique constrain
-    	
-    	results
+    	 
 	} // End - userCreate
+	
+	// =======================================================================
+	//                  doesDatabaseValueExistInTable
+	//
+	//    Verify value such as User Name doesn't already exist
+	//
+	def doesDatabaseValueExistInTable (columnName:String, tableName:String, value:String ): Boolean = {
+		
+		var valueExist = false;
+		
+		val sqlString = "SELECT * FROM " + tableName + " WHERE " + columnName + " = '" + value + "'"
+		//println("Sql String = " + sqlString)
+	  
+		var results = DB.withConnection { implicit connection =>
+		  	SQL (
+		  	    sqlString
+		  	).as(get[String](columnName)*) 		  	
+		}
+		
+		if (results.size >= 1) { valueExist = true}
+
+		return valueExist
+	  
+	} // End of doesDatabaseValueExistInTable
 	
 	
 }  // End of object User

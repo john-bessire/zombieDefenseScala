@@ -72,23 +72,38 @@ object Users extends Controller {
 	        val email    	= (json \ "email").validate[String]	        
 	        val password 	= (json \ "password").validate[String]	 
 	        val human	    = (json \ "human").validate[String]
-      
-	        // Create a new user and get user Id for the response
-	        val userPk = User.userCreate(User(NotAssigned, null, null, null, 
-	            userName.get, email.get, password.get, human.get))	 
-	        // TODO - add handler for duplicate user name
 	        
-	        // Get the user by Id
-	        val getNewUser = User.userById(userPk.get)
+	        // Check for duplicate user name
+		    var duplicate = User.doesDatabaseValueExistInTable("user_name", "users", (json \ "userName").toString().replace(""""""", ""))
+	        println("Create user duplicate = " + duplicate)
 	        
-	        // Make sure the user from Id has exists and has data
-	        getNewUser match {
-	            case Some(getNewUser) => {
-	                val jsonResp = Json.obj( "user" -> convertUserToJson(getNewUser))
-		            Ok(jsonResp)
-	            }
-	            case None => BadRequest("User not found")
+	        if (duplicate == false) {
+	          
+	            println("Duplicate = false, calling creatUser")
+     	        
+		        // Create a new user and get user Id for the response
+		        val userPk = User.userCreate(User(NotAssigned, null, null, null, 
+		            userName.get, email.get, password.get, human.get))	 
+		        
+		        // Get the user by Id
+		        val getNewUser = User.userById(userPk.get)
+		       
+		        // Make sure the user from Id has exists and has data
+		        getNewUser match {
+		            case Some(getNewUser) => {
+		                val jsonResp = Json.obj( "user" -> convertUserToJson(getNewUser))
+			            Ok(jsonResp)
+		            }
+		            case None => BadRequest("User not found")
+		        }
+	        		        
+	        } else {  
+	        	
+	            //val error = Json.obj("error" -> "Duplicate user name")
+	        	val error = errorJsonMessage("Duplicate user name")
+		        Ok(error)
 	        }
+		     
 		}.getOrElse {
 			BadRequest("Expecting Json data")
 		}
@@ -105,6 +120,15 @@ object Users extends Controller {
 			"human"         -> user.human
 		)
 	}
+
+	def errorJsonMessage (message:String): JsObject = {
+		val error = Json.obj (
+			"error" -> message
+		)
+	  
+		return error
+	}
+	
 
 
 } // End of object Users
