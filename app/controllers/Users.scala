@@ -67,20 +67,46 @@ object Users extends Controller {
 	    request.body.asJson.map { json =>
 	        println("Users.createUser - json: " + json)
 	        
-	        // TODO check for valid data here
-	        val userName 	= (json \ "userName").validate[String]	        
-	        val email    	= (json \ "email").validate[String]	        
-	        val password 	= (json \ "password").validate[String]	 
-	        val human	    = (json \ "human").validate[String]
+	        var status:Boolean = true
+	        var errorMessage = ""
+
+	        // TODO - add error checking for JsError message
+	        var userName 	= (json \ "userName").validate[String]       
+	        var email    	= (json \ "email").validate[String]	        
+	        var password 	= (json \ "password").validate[String]	 // Move password to login
+	        var human	    = (json \ "human").validate[String] // Assume new users are still living          
+        
+
+ //   		println("User Name = " + userName)
+//	        println("Email     = " + email)
+//	        println("Password  = " + password)
+		        
+        
+	        //  Check for valid user name
+	        if (status == true) {
+	    		var (statusUserName:Boolean, msgUserName:String) = checkValidUserName((json \ "userName").toString().replace(""""""", ""))
+	    			    		
+	    		if ( statusUserName == false){
+		        	status = false       	
+	    			errorMessage = msgUserName   
+		        }
+	        }
+	        
 	        
 	        // Check for duplicate user name
-		    var duplicate = User.doesDatabaseValueExistInTable("user_name", "users", (json \ "userName").toString().replace(""""""", ""))
-	        println("Create user duplicate = " + duplicate)
+	        if (status == true) {
+	        	// Check for duplicate user name
+		    	var duplicate = User.doesDatabaseValueExistInTable("user_name", "users", (json \ "userName").toString().replace(""""""", ""))
+    			if (duplicate == true) {
+    				status = false
+    				errorMessage = "Duplicate user name"
+
+    			}
+	        }
 	        
-	        if (duplicate == false) {
-	          
-	            println("Duplicate = false, calling creatUser")
-     	        
+	        // Create the user
+	        if (status == true) {
+    	        
 		        // Create a new user and get user Id for the response
 		        val userPk = User.userCreate(User(NotAssigned, null, null, null, 
 		            userName.get, email.get, password.get, human.get))	 
@@ -96,18 +122,18 @@ object Users extends Controller {
 		            }
 		            case None => BadRequest("User not found")
 		        }
-	        		        
-	        } else {  
-	        	
-	            //val error = Json.obj("error" -> "Duplicate user name")
-	        	val error = errorJsonMessage("Duplicate user name")
-		        Ok(error)
+
+	        } else {
+	            val error = errorJsonMessage(errorMessage)
+		        Ok(error)	
 	        }
-		     
+	        
 		}.getOrElse {
 			BadRequest("Expecting Json data")
 		}
-	}
+			
+		
+	}  // End of createUser
 	
 		
 	def convertUserToJson(user: User): JsObject = {
@@ -121,13 +147,58 @@ object Users extends Controller {
 		)
 	}
 
+	
+	// =======================================================================
+	//                   errorJsonMessage
+	//
+	//    Convert error message string into Json
+	//	
 	def errorJsonMessage (message:String): JsObject = {
 		val error = Json.obj (
 			"error" -> message
 		)
 	  
 		return error
-	}
+	} // End of errorJsonMessage
+	
+	
+	
+	// =======================================================================
+	//                        checkValidUserName
+	//
+	//     Checks for valid characters and the length of the user name
+	//
+	def checkValidUserName (userName:String): (Boolean, String) = {
+	  
+		var errorMessage = ""
+		var status = true
+		  
+		var tempJson = Json.obj()
+		
+		// Characters allowed in userName
+		val pattern = "[a-zA-Z0-9]".r
+		
+		// Find all valid characters in userName
+		val temp = (pattern findAllIn userName).mkString("")
+		
+		
+		if (temp.trim().length() != userName.trim().length()) { 
+			status = false
+
+		} 
+				
+		// Check length of userName
+		if (userName.length() > 35) {status = false}
+		if (userName.length() < 2) {status = false}
+		
+		if (status == false) {
+			errorMessage = "User name must be between 2 to 35 characters with number and alpahbet chacters"
+		  
+		}
+		
+		return (status, errorMessage)
+	}  // End of checkValidUserName
+
 	
 
 
