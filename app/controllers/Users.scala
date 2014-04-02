@@ -16,6 +16,12 @@ import play.api.libs.json._
 import play.api.libs.json.Json
 import play.api.mvc.Controller
 
+import scala.runtime
+import scala.runtime.RichChar
+import scala.collection.immutable.StringOps
+import scala.collection.mutable.StringBuilder
+
+
 
 import play.api.Play.current
 import anorm.SqlParser._
@@ -62,41 +68,59 @@ object Users extends Controller {
     //                    createUser
 	//
 	//    Create a new user 
+	//
+	//      The field "being" has three states (human, zombie, unknown)
 	// 
 	def createUser = Action { implicit request =>
 	    request.body.asJson.map { json =>
 	        println("Users.createUser - json: " + json)
 	        
+	        val error = "*^*Error*@*"
 	        var status:Boolean = true
 	        var errorMessage = ""
-
-	        // TODO - add error checking for JsError message
-	        var userName 	= (json \ "userName").validate[String]       
-	        var email    	= (json \ "email").validate[String]	        
-	        var password 	= (json \ "password").validate[String]	 // Move password to login
-	        var human	    = (json \ "human").validate[String] // Assume new users are still living          
-        
-
- //   		println("User Name = " + userName)
-//	        println("Email     = " + email)
-//	        println("Password  = " + password)
-		        
-        
+	          
+	        var userName    = ((json \ "userName").validate[String]).getOrElse(error)
+	        var email    	= ((json \ "email").validate[String]).getOrElse(error)	        
+	        var password 	= ((json \ "password").validate[String]).getOrElse(error)
+	        var being	    = ((json \ "being").validate[String]).getOrElse(error)  
+	       	        
+	        if (userName == error) {status = false; errorMessage = "Invalid user name"}
+	        if (email    == error) {status = false; errorMessage = "Invalid email address"}
+	        if (password == error) {status = false; errorMessage = "Invalid password"}
+	        if (being    == error) {status = false; errorMessage = "Invalid being"}
+  	              
 	        //  Check for valid user name
 	        if (status == true) {
-	    		var (statusUserName:Boolean, msgUserName:String) = checkValidUserName((json \ "userName").toString().replace(""""""", ""))
+	    		var (statusUserName:Boolean, msgUserName:String) = checkValidUserName(userName)
 	    			    		
 	    		if ( statusUserName == false){
 		        	status = false       	
 	    			errorMessage = msgUserName   
 		        }
 	        }
+
+	        // Check for valid email address
+	        if (status == true) {
+	        	var (statusEmail:Boolean, msgEmail:String) = checkValidEmailAddress(email)
+	            if (statusEmail == false) {
+	            	status = false
+	            	errorMessage = msgEmail
+	            }
+	        }
 	        
+	        // Check for valid password
+	        if (status == true) {
+	            var (statusPassword:Boolean, msgPassword:String) = checkValidPassword(password)
+	            if (statusPassword == false){
+	            	status = false
+	            	errorMessage = msgPassword
+	            }         
+	        }     
 	        
 	        // Check for duplicate user name
 	        if (status == true) {
 	        	// Check for duplicate user name
-		    	var duplicate = User.doesDatabaseValueExistInTable("user_name", "users", (json \ "userName").toString().replace(""""""", ""))
+		    	var duplicate = User.doesDatabaseValueExistInTable("user_name", "users", userName)
     			if (duplicate == true) {
     				status = false
     				errorMessage = "Duplicate user name"
@@ -109,7 +133,7 @@ object Users extends Controller {
     	        
 		        // Create a new user and get user Id for the response
 		        val userPk = User.userCreate(User(NotAssigned, null, null, null, 
-		            userName.get, email.get, password.get, human.get))	 
+		            userName, email, password, being))	 
 		        
 		        // Get the user by Id
 		        val getNewUser = User.userById(userPk.get)
@@ -143,7 +167,7 @@ object Users extends Controller {
 			"userName"   	-> user.userName,
 			"email"      	-> user.email,
 			"password" 		-> user.password,
-			"human"         -> user.human
+			"being"         -> user.being
 		)
 	}
 
@@ -166,15 +190,17 @@ object Users extends Controller {
 	// =======================================================================
 	//                        checkValidUserName
 	//
-	//     Checks for valid characters and the length of the user name
+	//  
+	//    The only symbols allowed are .(dot), -(dash) or _(underscore).
+	//    Must not begin with any symbols.
+	//    Must not end with any symbols.
+	//    Must not include consecutive symbols. 
 	//
 	def checkValidUserName (userName:String): (Boolean, String) = {
 	  
 		var errorMessage = ""
 		var status = true
 		  
-		var tempJson = Json.obj()
-		
 		// Characters allowed in userName
 		val pattern = "[a-zA-Z0-9]".r
 		
@@ -199,7 +225,66 @@ object Users extends Controller {
 		return (status, errorMessage)
 	}  // End of checkValidUserName
 
+
+	def checkValidEmailAddress(email:String): (Boolean, String) = {
+
+		val maxLength = 60
+	  
+		return (true, "Email")
+	}
+
 	
+	// =======================================================================
+	//                      checkValidPassword
+	// 
+	//    Password MUST include at least 
+	//        1 UPPERCASE alphabetic character, 
+	//        1 LOWERCASE alphabetic character
+	//        1 numeric character. 
+	//    Use a combination of 
+	//        uppercase and lowercase letters (Aa–Zz),
+	//        numbers (0–9), 
+	//        symbols ( @ # $ % ^ & * ( ) _ + | ~ - = ` { } [ ] : ; " < > ? , . /). 
+	//    The symbols that are NOT allowed are 
+	//        \ (back slash) or "(quotes). 
+	//
+	//    List of allowed symbols !@#$%^&*()_+|~-=`{}[]:;<>?,./)
+	// 
+	def checkValidPassword(password:String): (Boolean, String) = {
+	  
+		val minLength = 8
+		val maxLength  = 150
+		
+		var status:Boolean = true
+		var errorMessage = ""
+
+		// Characters allowed in password
+		var pattern = "[a-zA-Z0-9\\!\\@\\#\\$\\%\\^\\&\\&\\*\\(\\)\\_\\+\\|\\~\\-\\=\\`\\{\\}\\[\\]\\:\\;\\<\\>\\?\\,\\.\\/]".r
+				
+		// Find all valid characters in password
+		val temp = (pattern findAllIn password).mkString("")
+		
+		// Check for at least on uppercase character, lowercase and number
+		val upper  = ("[A-Z]*".r findAllIn password).mkString("")
+		val lower  = ("[a-z]*".r findAllIn password).mkString("")
+		val digits = ("[0-9]*".r findAllIn password).mkString("")		
+		
+		if (upper.length()  == 0 ) {status = false}
+		if (lower.length()  == 0 ) {status = false}
+		if (digits.length() == 0) {status = false}
+		
+		// After all valid characters removed password and temp should be equal
+		if (temp != password) {status = false}
+
+		// Check length of password
+		if (password.length() > maxLength) {status = false}
+		if (password.length() < minLength) {status = false}
+		
+		if (status == false) {errorMessage = "Password nust be between " + minLength + " and "  + maxLength + ". Contain one lower case letter, Conatin one upper case letter, contain one number and use can use the symbols !@#$%^&*()_+|~-=`{}[]:;<>?,./"}
+	  
+		return (status, errorMessage)
+	} // checkValidPassword
+
 
 
 } // End of object Users

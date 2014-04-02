@@ -16,7 +16,7 @@ case class User(
     userName:   String,
     email: 	    String,
     password:   String,
-    human:      String      // Human, Zombie, injured and in unknown state
+    being:      String      // being, Zombie, injured and in unknown state
 )
 
 object User {
@@ -30,9 +30,9 @@ object User {
 	    get[String]("users.user_name") ~
 	    get[String]("users.email") ~
 	    get[String]("users.password") ~
-	    get[String]("users.human")  map {
-			case id ~ created ~ lastActive ~ lastLogin ~ userName ~ email ~ password ~ human => 
-			  	User(id, created, lastActive, lastLogin, userName, email, password, human)
+	    get[String]("users.being")  map {
+			case id ~ created ~ lastActive ~ lastLogin ~ userName ~ email ~ password ~ being => 
+			  	User(id, created, lastActive, lastLogin, userName, email, password, being)
 	    }
 	}
   
@@ -77,19 +77,19 @@ object User {
 		val user_name = user.userName
 		val email     = user.email
 		val password  = user.password
-		val human     = user.human
+		val being     = user.being
 		
 		DB.withConnection { implicit connection =>
 	      	SQL(	      	    
      			"""
-	      			INSERT INTO users (created, last_active, last_login, user_name, email, password, human ) 
-	      			VALUES ('1999-01-08','1999-01-08','1999-01-08', {userName}, {email}, {password}, {human})
+	      			INSERT INTO users (created, last_active, last_login, user_name, email, password, being ) 
+	      			VALUES ('1999-01-08','1999-01-08','1999-01-08', {userName}, {email}, {password}, {being})
 	      	    """	      	
       		).on(
       			'userName   -> user.userName,
       			'email 	    -> user.email,
       			'password   -> user.password,
-      			'human      -> user.human
+      			'being      -> user.being
  
       		).executeInsert()
       		

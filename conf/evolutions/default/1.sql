@@ -19,8 +19,8 @@ CREATE TABLE "users" (
 	last_login TIMESTAMP,
 	user_name VARCHAR(45) UNIQUE,
 	email VARCHAR(60),
-	password VARCHAR(20),
-	human VARCHAR(15),
+	password VARCHAR(75),
+	being VARCHAR(15),
 	PRIMARY KEY(id)
 );
 
