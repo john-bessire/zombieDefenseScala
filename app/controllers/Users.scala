@@ -15,16 +15,14 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.json.Json
 import play.api.mvc.Controller
-
 import scala.runtime
 import scala.runtime.RichChar
 import scala.collection.immutable.StringOps
 import scala.collection.mutable.StringBuilder
-
-
-
 import play.api.Play.current
 import anorm.SqlParser._
+
+import java.lang.String
 
 
 object Users extends Controller {
@@ -148,7 +146,7 @@ object Users extends Controller {
 		        }
 
 	        } else {
-	            val error = errorJsonMessage(errorMessage)
+	            val error = common.ErrorHandling.errorJsonMessage(errorMessage)
 		        Ok(error)	
 	        }
 	        
@@ -172,21 +170,9 @@ object Users extends Controller {
 	}
 
 	
-	// =======================================================================
-	//                   errorJsonMessage
-	//
-	//    Convert error message string into Json
-	//	
-	def errorJsonMessage (message:String): JsObject = {
-		val error = Json.obj (
-			"error" -> message
-		)
-	  
-		return error
-	} // End of errorJsonMessage
+
 	
-	
-	
+		
 	// =======================================================================
 	//                        checkValidUserName
 	//
@@ -225,14 +211,30 @@ object Users extends Controller {
 		return (status, errorMessage)
 	}  // End of checkValidUserName
 
-
+	// =======================================================================
+	//                     checkValidEmailAddress
+	//
 	def checkValidEmailAddress(email:String): (Boolean, String) = {
 
-		val maxLength = 60
+		val maxLength = 254
+		
+		var status = true
+		var errorMessage = ""
+		
+		// Email must contain a period but not first or last character
+		if (email.indexOf(".") <= 0 ) {status = false} 
+		if (email.lastIndexOf(".") == email.length()) {status = false}
+		
+		// Can't have two periods in a row
+		if (email.indexOf("..") >= 0) {status = false} 
+		
+		// Must have an @
+		if (email.indexOf("@") == -1) {status = false} 
+	
+		if (status == false) {errorMessage = "Ivalid email address"}
 	  
-		return (true, "Email")
-	}
-
+		return (status, errorMessage)
+	} // End of checkValidEmailAddress
 	
 	// =======================================================================
 	//                      checkValidPassword

@@ -18,8 +18,8 @@ CREATE TABLE "users" (
 	last_active TIMESTAMP,
 	last_login TIMESTAMP,
 	user_name VARCHAR(45) UNIQUE,
-	email VARCHAR(60),
-	password VARCHAR(75),
+	email VARCHAR(254),
+	password VARCHAR(100),
 	being VARCHAR(15),
 	PRIMARY KEY(id)
 );

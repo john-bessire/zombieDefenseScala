@@ -1,16 +1,23 @@
 
 package common
 
-object Common {
+import play.api.libs.json.Json._
+import play.api.libs.json._
+
+object ErrorHandling {
   
-	object errorList {
-		var id = 0;
-		
+	// =======================================================================
+	//                   errorJsonMessage
+	//
+	//    Convert error message string into Json
+	//	
+	def errorJsonMessage (message:String): JsObject = {
+		val error = Json.obj (
+			"error" -> message
+		)
 	  
-	}
-  
-  
-    def errorUserMaxLength(): String = {return "User name too long, max 35 characters"}
+		return error
+	} // End of errorJsonMessage
   
   
 }
