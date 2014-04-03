@@ -2,14 +2,6 @@
  
 # --- !Ups
 
-CREATE SEQUENCE task_id_seq;
-CREATE TABLE task (
-    id integer NOT NULL DEFAULT nextval('task_id_seq'),
-    label varchar(255),
-    zombieOutbreakLocotion varchar(255),
-    numberZombiesSpotted integer, 
-    needHelp boolean
-);
 
 CREATE SEQUENCE user_id_seq;
 CREATE TABLE "users" (
@@ -19,25 +11,18 @@ CREATE TABLE "users" (
 	last_login TIMESTAMP,
 	user_name VARCHAR(45) UNIQUE,
 	email VARCHAR(254),
-	password VARCHAR(100),
-	being VARCHAR(15),
+	password VARCHAR(150),
+	livingStatus VARCHAR(25),
 	PRIMARY KEY(id)
 );
 
-CREATE TABLE "temp" (
-	name varchar(35),
-	age integer
-);
+
 
 
  
 # --- !Downs
 
- 
-DROP TABLE task;
-DROP SEQUENCE task_id_seq;
+
 
 DROP TABLE users CASCADE;
-DROP TABLE user CASCADE;
-
 DROP SEQUENCE user_id_seq CASCADE;

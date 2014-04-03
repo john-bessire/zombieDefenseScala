@@ -15,10 +15,6 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.json.Json
 import play.api.mvc.Controller
-import scala.runtime
-import scala.runtime.RichChar
-import scala.collection.immutable.StringOps
-import scala.collection.mutable.StringBuilder
 import play.api.Play.current
 import anorm.SqlParser._
 
@@ -51,6 +47,9 @@ object Users extends Controller {
 	//    Retrieve one user by User Id
 	//
 	def byId(id: Long) = Action { implicit request =>
+	  
+	  	println("Users.byId: " + id)
+	  
 	    User.userById(id) match { 
 	        case Some(user) => {
 	             val userJson = Json.obj( "user" -> convertUserToJson(user) )
@@ -67,7 +66,7 @@ object Users extends Controller {
 	//
 	//    Create a new user 
 	//
-	//      The field "being" has three states (human, zombie, unknown)
+	//      The field "livingStatus" has three states (human, zombie, unknown)
 	// 
 	def createUser = Action { implicit request =>
 	    request.body.asJson.map { json =>
@@ -80,12 +79,12 @@ object Users extends Controller {
 	        var userName    = ((json \ "userName").validate[String]).getOrElse(error)
 	        var email    	= ((json \ "email").validate[String]).getOrElse(error)	        
 	        var password 	= ((json \ "password").validate[String]).getOrElse(error)
-	        var being	    = ((json \ "being").validate[String]).getOrElse(error)  
+	        var livingStatus	    = ((json \ "livingStatus").validate[String]).getOrElse(error)  
 	       	        
 	        if (userName == error) {status = false; errorMessage = "Invalid user name"}
 	        if (email    == error) {status = false; errorMessage = "Invalid email address"}
 	        if (password == error) {status = false; errorMessage = "Invalid password"}
-	        if (being    == error) {status = false; errorMessage = "Invalid being"}
+	        if (livingStatus    == error) {status = false; errorMessage = "Invalid livingStatus"}
   	              
 	        //  Check for valid user name
 	        if (status == true) {
@@ -131,7 +130,7 @@ object Users extends Controller {
     	        
 		        // Create a new user and get user Id for the response
 		        val userPk = User.userCreate(User(NotAssigned, null, null, null, 
-		            userName, email, password, being))	 
+		            userName, email, password, livingStatus))	 
 		        
 		        // Get the user by Id
 		        val getNewUser = User.userById(userPk.get)
@@ -165,14 +164,10 @@ object Users extends Controller {
 			"userName"   	-> user.userName,
 			"email"      	-> user.email,
 			"password" 		-> user.password,
-			"being"         -> user.being
+			"livingStatus"  -> user.livingStatus
 		)
 	}
-
 	
-
-	
-		
 	// =======================================================================
 	//                        checkValidUserName
 	//
@@ -266,6 +261,9 @@ object Users extends Controller {
 		// Find all valid characters in password
 		val temp = (pattern findAllIn password).mkString("")
 		
+		// After all valid characters removed password and temp should be equal
+		if (temp != password) {status = false}
+		
 		// Check for at least on uppercase character, lowercase and number
 		val upper  = ("[A-Z]*".r findAllIn password).mkString("")
 		val lower  = ("[a-z]*".r findAllIn password).mkString("")
@@ -274,9 +272,6 @@ object Users extends Controller {
 		if (upper.length()  == 0 ) {status = false}
 		if (lower.length()  == 0 ) {status = false}
 		if (digits.length() == 0) {status = false}
-		
-		// After all valid characters removed password and temp should be equal
-		if (temp != password) {status = false}
 
 		// Check length of password
 		if (password.length() > maxLength) {status = false}
