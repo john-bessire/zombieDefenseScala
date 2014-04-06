@@ -20,6 +20,7 @@ GET		/users/:id				controllers.Users.byId(id: Long)
 POST    /                           controllers.Application.submit
 
 GET     /bearing		controllers.Application.bearing
+GET		/distance       controllers.Application.distance
 
 #GET /test controllers.Application.test(param1:String, param2:String)
 

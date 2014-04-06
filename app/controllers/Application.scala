@@ -51,6 +51,19 @@ object Application extends Controller {
       Ok
     }
     
+    def distance = Action {
+    	val latitude1 = 37.386052
+    	val longitude1 = -122.083851
+      
+    	var(latitude2:Double, longitude2:Double) = models.Geolocation.calculateNewLocationFromDistanceAndBearing(latitude1, longitude1, 1.0, 0)
+ 
+    	var distance = models.Geolocation.calculateDistanceBetweenTwoPoints(latitude1, longitude1, latitude2, longitude2)
+ 
+    	println("Distance = " + distance)
+    	
+    	Ok("Distance")
+    }
+    
   
   def submit = Action { implicit request =>
 		val (fname, lname) = form.bindFromRequest.get
@@ -66,7 +79,7 @@ object Application extends Controller {
   def getLocation = Action {
 	  println("Get Location called")  
 	  
-	  Geolocation.getLatitudeAndLongitude("Mountain View, Ca")
+	  Geolocation.getLatitudeAndLongitudeFromAddress("Mountain View, Ca")
 
       
       println("After function called to get longitide and latitude")
