@@ -8,6 +8,9 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.libs.ws.WS
 import models.Geolocation
+import common.ErrorHandling
+import models.Geolocation
+import common.ErrorHandling
 
 object Application extends Controller {
   
@@ -22,10 +25,32 @@ object Application extends Controller {
 
    
   def index = Action {
-    
+
+      
+      
 	  println ("Action Index")
 	  Ok(views.html.index())
   }
+    
+    
+    
+    def test = Action {implicit request =>
+    	println (request)
+
+      //Redirect(routes.Application.index).withSession("token" -> t.token, "secret" -> t.secret)
+      
+    	Ok
+    }
+    
+    def bearing = Action {      
+    	var(latitude:Double, longitude:Double) = models.Geolocation.calculateNewLocationFromDistanceAndBearing(37.386052, -122.083851, 1.0, 0)
+  
+    	println("Latitide  = " + latitude)
+    	println("Longitude = " + longitude)
+    	
+      Ok
+    }
+    
   
   def submit = Action { implicit request =>
 		val (fname, lname) = form.bindFromRequest.get
@@ -41,7 +66,7 @@ object Application extends Controller {
   def getLocation = Action {
 	  println("Get Location called")  
 	  
-	  Geolocation.fetchLatitudeAndLongitude("Mountain View, Ca")
+	  Geolocation.getLatitudeAndLongitude("Mountain View, Ca")
 
       
       println("After function called to get longitide and latitude")
@@ -49,5 +74,4 @@ object Application extends Controller {
   }
  
   
-  def test = TODO
 }
