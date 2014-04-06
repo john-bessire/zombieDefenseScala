@@ -1,5 +1,7 @@
 package models
 
+import scala.util.Random
+
 import akka.util.Timeout
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -107,6 +109,19 @@ object Geolocation {
 	    return earthRadius * c;
 
 	} // End of calculateDistanceBetweenTwoPoints
+	
+
+	
+
+	
+	
+	
+	def generateZombieOutbreak(numberOfZombiesMainOutbreack:Integer, firstRadiusKm:Double, 
+	    numSecondaryOutbreaks:Integer, sizeSecondayOutbreaks:Integer, secondaryRadius:Double) {
+	  
+		
+	  
+	}
  
   
 } // End of object Geolocation

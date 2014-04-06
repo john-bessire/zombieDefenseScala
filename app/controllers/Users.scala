@@ -17,6 +17,8 @@ import play.api.libs.json.Json
 import play.api.mvc.Controller
 import play.api.Play.current
 import anorm.SqlParser._
+import scala.util.Random
+
 
 import java.lang.String
 
@@ -283,6 +285,55 @@ object Users extends Controller {
 	} // checkValidPassword
 
 
+		// =======================================================================
+		//                            getRandomFirstName
+		//	
+		def getRandomFirstName(mf:String): String = {
+	  
+		var firstName = ""
+	  
+		if (mf.toLowerCase() == "m") {  // Male first names
+	  
+			var guyFirstNames = Array("Mark", "Marcus", "Marky", " Maurice", 
+			    "Jim", "James", "Jessie", "Jon", "John", "Johnn", "Johnny", "Jaun", 
+			    "Bill", "Billy", "William", "Willard", 
+			    "Tom", "Thomas", "Tommy", "Timmy", 
+			    "Rick", "Ricky", "Ricardo")
+			    
+		    firstName =  guyFirstNames(Random.nextInt(guyFirstNames.length))
+		    	    
+		} else {  // Female first names
+			var womanFirstNames = Array("Anne", "Amy", "Cindy", "Shelly", "Merry", "Marie", "michelle", 
+			    "Jenifer", "Jessica", "Sharon", "Shelly", "Tina", "Tammy")
+			    
+			firstName =  womanFirstNames(Random.nextInt(womanFirstNames.length))	
+
+		}
+		
+		firstName
+	} // End of getRandomFirstName
+	
+		
+	// =======================================================================
+	//                       generateRandomUserName
+	//	
+	def generateRandomUserName(): String = {
+
+		var maleFemale = Array ("m", "f")
+		var mf = maleFemale(Random.nextInt(maleFemale.length))
+		
+		var userName =  getRandomFirstName(mf) + Random.nextInt(1000000).toString
+
+		return userName
+	} // End of generateRandomUserName
+	
+	
+	def generateRandomUsers (longitude:Double, latitude:Double, radius:Double, livingStatus:String) {
+	  		
+	
+	
+	}
+		
 
 } // End of object Users
 	

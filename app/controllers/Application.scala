@@ -9,8 +9,7 @@ import play.api.data.Forms._
 import play.api.libs.ws.WS
 import models.Geolocation
 import common.ErrorHandling
-import models.Geolocation
-import common.ErrorHandling
+
 
 object Application extends Controller {
   
@@ -43,6 +42,19 @@ object Application extends Controller {
     }
     
     def bearing = Action {      
+      
+      
+    	println ("Random first name = " +  Users.getRandomFirstName("m") ) 
+    	println ("Random first name = " +  Users.getRandomFirstName("m") )
+    	println ("Random first name = " +  Users.getRandomFirstName("m") )
+    	println ("Random first name = " +  Users.getRandomFirstName("f") )
+    	println ("Random first name = " +  Users.getRandomFirstName("f") )
+    	println ("Random first name = " +  Users.getRandomFirstName("f") )
+    	
+    	println("Create user name   = " + Users.generateRandomUserName())
+    	println("Create user name   = " + Users.generateRandomUserName())
+      
+      
     	var(latitude:Double, longitude:Double) = models.Geolocation.calculateNewLocationFromDistanceAndBearing(37.386052, -122.083851, 1.0, 0)
   
     	println("Latitide  = " + latitude)
