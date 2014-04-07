@@ -3,7 +3,7 @@
 logs
 project/project
 project/target
-
+.target
 
 # sbt specific
 .cache/

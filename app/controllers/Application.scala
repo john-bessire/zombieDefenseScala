@@ -10,6 +10,9 @@ import play.api.libs.ws.WS
 import models.Geolocation
 import common.ErrorHandling
 
+import play.api.libs.oauth._
+import play.mvc.Results.Redirect
+
 
 object Application extends Controller {
   
@@ -21,35 +24,56 @@ object Application extends Controller {
 	    )
 	)
 
+	
+	//def index = Action { implicit request =>
+	
+	def index = Action {implicit request => 
+	  	println("Headers = " + request.headers)
+		println("Body =    " + request.body)
+	
+    //def index(token:String, secret:String) = Action { 
 
-   
-  def index = Action {
 
+	      
+		// println ("Action Index")
+		// Ok(views.html.index())
+	    Ok("Index page")  
+    }
+    
+    def auth = Action {implicit request => 
+  	  	println("Headers = " + request.headers)
+		println("Body =    " + request.body)
       
-      
-	  println ("Action Index")
-	  Ok(views.html.index())
-  }
+    	Ok("Function auth")
+    }
     
     
-    
-    def test = Action {implicit request =>
-    	println (request)
+    def twitter = Action { implicit request => 
+	  	println("Headers = " + request.headers)
+		println("Body =    " + request.body)
 
-      //Redirect(routes.Application.index).withSession("token" -> t.token, "secret" -> t.secret)
+	    Ok("Redirect form Twitter")      
       
-    	Ok
+    }
+    
+    
+    def test = Action {
+      	println("Function test called")
+      	
+    	authenticate
+     
+    	Ok ("Function test")
     }
     
     def bearing = Action {      
       
       
-    	println ("Random first name = " +  Users.getRandomFirstName("m") ) 
-    	println ("Random first name = " +  Users.getRandomFirstName("m") )
-    	println ("Random first name = " +  Users.getRandomFirstName("m") )
-    	println ("Random first name = " +  Users.getRandomFirstName("f") )
-    	println ("Random first name = " +  Users.getRandomFirstName("f") )
-    	println ("Random first name = " +  Users.getRandomFirstName("f") )
+    	println ("Random first name = " +  Users.generateRandomFirstName("m") ) 
+    	println ("Random first name = " +  Users.generateRandomFirstName("m") )
+    	println ("Random first name = " +  Users.generateRandomFirstName("m") )
+    	println ("Random first name = " +  Users.generateRandomFirstName("f") )
+    	println ("Random first name = " +  Users.generateRandomFirstName("f") )
+    	println ("Random first name = " +  Users.generateRandomFirstName("f") )
     	
     	println("Create user name   = " + Users.generateRandomUserName())
     	println("Create user name   = " + Users.generateRandomUserName())
@@ -99,4 +123,57 @@ object Application extends Controller {
   }
  
   
-}
+  	val KEY = ConsumerKey("1HNZuoq17HmGHCkwl4flg", "uVsFvXopnTn6LrSqUNfOEqCI0Xk2eMNQDFLEXKe6I")
+ 
+	val TWITTER = OAuth(ServiceInfo(
+	    "https://api.twitter.com/oauth/request_token",
+	    "https://api.twitter.com/oauth/access_token",
+	    "https://api.twitter.com/oauth/authorize", KEY),
+	    true)
+	    
+	  
+
+def authenticate = Action { request =>
+    request.getQueryString("oauth_verifier").map { verifier =>
+      val tokenPair = sessionTokenPair(request).get
+      // We got the verifier; now get the access token, store it and back to index
+      TWITTER.retrieveAccessToken(tokenPair, verifier) match {
+        case Right(t) => {
+          // We received the authorized tokens in the OAuth object - store it before we proceed
+          
+          println("Twitter toke recieved" + t.token)
+          println("Twitter secret received" + t.secret)
+          
+          Redirect(routes.Application.index).withSession("token" -> t.token, "secret" -> t.secret)
+ 
+        }
+        case Left(e) => throw e
+      }
+    }.getOrElse(
+      TWITTER.retrieveRequestToken("http://localhost:9000/auth") match {
+        case Right(t) => {
+          // We received the unauthorized tokens in the OAuth object - store it before we proceed
+          
+          println("Retreive Twitter token  = " + t.token)
+          println("Retreive Twitter secret = " + t.secret)
+          
+          Redirect(TWITTER.redirectUrl(t.token)).withSession("token" -> t.token, "secret" -> t.secret)
+        }
+        case Left(e) => throw e
+      })
+  }
+
+  def sessionTokenPair(implicit request: RequestHeader): Option[RequestToken] = {
+    for {
+      token <- request.session.get("token")
+      secret <- request.session.get("secret")
+      
+      
+      
+    } yield {
+      RequestToken(token, secret)
+    }
+  }
+
+ 
+} // End of Application

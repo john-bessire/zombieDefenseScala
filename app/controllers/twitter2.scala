@@ -22,7 +22,7 @@ object Twitter2 extends Controller {
       TWITTER.retrieveAccessToken(tokenPair, verifier) match {
         case Right(t) => {
           // We received the authorized tokens in the OAuth object - store it before we proceed
-          Redirect(routes.Application.test).withSession("token" -> t.token, "secret" -> t.secret)
+          Redirect(routes.Application.index).withSession("token" -> t.token, "secret" -> t.secret)
  
         }
         case Left(e) => throw e
@@ -47,4 +47,5 @@ object Twitter2 extends Controller {
   }
   * 
   */
+
 }

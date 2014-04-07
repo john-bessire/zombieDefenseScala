@@ -285,10 +285,10 @@ object Users extends Controller {
 	} // checkValidPassword
 
 
-		// =======================================================================
-		//                            getRandomFirstName
-		//	
-		def getRandomFirstName(mf:String): String = {
+	// =======================================================================
+	//                            getRandomFirstName
+	//	
+	def generateRandomFirstName(mf:String): String = {
 	  
 		var firstName = ""
 	  
@@ -322,14 +322,22 @@ object Users extends Controller {
 		var maleFemale = Array ("m", "f")
 		var mf = maleFemale(Random.nextInt(maleFemale.length))
 		
-		var userName =  getRandomFirstName(mf) + Random.nextInt(1000000).toString
+		var userName =  generateRandomFirstName(mf) + Random.nextInt(1000000).toString
 
 		return userName
 	} // End of generateRandomUserName
 	
 	
-	def generateRandomUsers (longitude:Double, latitude:Double, radius:Double, livingStatus:String) {
-	  		
+	def generateRandomUser (longitude:Double, latitude:Double, radius:Double, livingStatus:String) {
+
+		var userName = generateRandomUserName()
+	  
+		var user = Json.obj(
+			"userName"   	-> userName,
+			"email"      	-> (userName + "@" + userName + ".com"),
+			"password" 		-> ("password" + userName),
+			"livingStatus"  -> livingStatus
+		)
 	
 	
 	}

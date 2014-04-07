@@ -21,7 +21,12 @@ POST    /                           controllers.Application.submit
 
 GET     /bearing		controllers.Application.bearing
 GET		/distance       controllers.Application.distance
+GET 	/oauth			controllers.Application.authenticate
 
-#GET /test controllers.Application.test(param1:String, param2:String)
+GET		/twitter		controllers.Application.twitter
+
+#GET /index controllers.Application.index(param1:String, param2:String)
+
+
 
 
