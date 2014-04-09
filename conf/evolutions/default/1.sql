@@ -13,6 +13,8 @@ CREATE TABLE "users" (
 	email VARCHAR(254),
 	password VARCHAR(150),
 	livingStatus VARCHAR(25),
+	latitude DOUBLE PRECISION,
+	longitude DOUBLE PRECISION,
 	PRIMARY KEY(id)
 );
 

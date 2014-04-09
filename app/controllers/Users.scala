@@ -1,5 +1,6 @@
 package controllers
 
+
 import models._
 import views._
 import anorm._
@@ -19,12 +20,21 @@ import play.api.Play.current
 import anorm.SqlParser._
 import scala.util.Random
 
+import java.util.{Date}
+
+
+
+
 
 import java.lang.String
 
 
+
+
+
 object Users extends Controller {
- 
+  
+
 
 	// =======================================================================
     //               allUsers
@@ -78,15 +88,25 @@ object Users extends Controller {
 	        var status:Boolean = true
 	        var errorMessage = ""
 	          
-	        var userName    = ((json \ "userName").validate[String]).getOrElse(error)
-	        var email    	= ((json \ "email").validate[String]).getOrElse(error)	        
-	        var password 	= ((json \ "password").validate[String]).getOrElse(error)
-	        var livingStatus	    = ((json \ "livingStatus").validate[String]).getOrElse(error)  
+	        var userName      = ((json \ "userName").validate[String]).getOrElse(error)
+	        var email    	  = ((json \ "email").validate[String]).getOrElse(error)	        
+	        var password 	  = ((json \ "password").validate[String]).getOrElse(error)
+	        var livingStatus  = ((json \ "livingStatus").validate[String]).getOrElse(error)  
+	        var latitude:Double      = ((json \ "latitude").validate[Double]).getOrElse(-999) 
+	        var longitude:Double     = ((json \ "longitude").validate[Double]).getOrElse(-999)
+
+		
+
+	
+		        
+
+	        
 	       	        
 	        if (userName == error) {status = false; errorMessage = "Invalid user name"}
 	        if (email    == error) {status = false; errorMessage = "Invalid email address"}
 	        if (password == error) {status = false; errorMessage = "Invalid password"}
 	        if (livingStatus    == error) {status = false; errorMessage = "Invalid livingStatus"}
+	        // TODO - check latitude and longitude
   	              
 	        //  Check for valid user name
 	        if (status == true) {
@@ -129,10 +149,9 @@ object Users extends Controller {
 	        
 	        // Create the user
 	        if (status == true) {
-    	        
+	      
 		        // Create a new user and get user Id for the response
-		        val userPk = User.userCreate(User(NotAssigned, null, null, null, 
-		            userName, email, password, livingStatus))	 
+		        val userPk = User.userCreate(User(NotAssigned, null, null, null, userName, email, password, livingStatus, latitude, longitude))	 
 		        
 		        // Get the user by Id
 		        val getNewUser = User.userById(userPk.get)
@@ -166,7 +185,9 @@ object Users extends Controller {
 			"userName"   	-> user.userName,
 			"email"      	-> user.email,
 			"password" 		-> user.password,
-			"livingStatus"  -> user.livingStatus
+			"livingStatus"  -> user.livingStatus,
+			"latitude"      -> user.latitude,
+			"longitude"     -> user.longitude
 		)
 	}
 	
@@ -328,20 +349,121 @@ object Users extends Controller {
 	} // End of generateRandomUserName
 	
 	
-	def generateRandomUser (longitude:Double, latitude:Double, radius:Double, livingStatus:String) {
-
-		var userName = generateRandomUserName()
+	// =======================================================================
+	//                   generateRandomUser
+	//
+	def generateRandomUser (latitude:Double, longitude:Double, radius:Double, livingStatus:String): Long = {
 	  
-		var user = Json.obj(
-			"userName"   	-> userName,
-			"email"      	-> (userName + "@" + userName + ".com"),
-			"password" 		-> ("password" + userName),
-			"livingStatus"  -> livingStatus
-		)
-	
-	
-	}
+		var userName    = ""
+		var email       = ""
+		var password    = ""
+		var distanceKm  = 0.0
+		var bearing:Double     = 0.0
+		var latitude1 = latitude
+		var longitude1 = longitude
 		
+		// Is this a zombie, human, injured or missing	
+		livingStatus match {
+		    case common.Globals.statusHuman   => 
+		      	userName = generateRandomUserName()
+
+		    case common.Globals.statusZombie  => 
+		        userName = "zombie" + Random.nextInt(10000000).toString
+		        
+		    case common.Globals.statusMissing => "missing"
+		        // TODO - Missing random user
+		    case common.Globals.statusUnknown => "Unknow"
+		        // TODO user in unknown human/zombie status		      
+		    case common.Globals.statusRandom  => "Random"
+		       // TODO random user of zombie
+		}
+		
+		email = userName + "@gmail.com"
+		password = "password" + userName
+		
+		if (radius > 0) {
+			bearing = Random.nextInt(360).toDouble * Random.nextDouble
+			distanceKm = radius * Random.nextDouble
+			
+			var(lat2, lon2) =  models.Geolocation.calculateNewLocationFromDistanceAndBearing(latitude, longitude, distanceKm, bearing)
+			latitude1  = lat2
+			longitude1 = lon2
+		  
+		}		
+		
+		println("\n\n\n")
+		println("Random user - User Name = " + userName)
+		println("Random user - email     = " + email)
+		println("Random user - password  = " + password)		
+		println("Random user - latitude  = " + latitude1)
+		println("Random user - Longitude = " + longitude1)
+	
+		
+		val userId = User.userCreate(User(NotAssigned, null, null, null, userName, email, password, livingStatus, latitude1, longitude1))	 
+
+		println("User id = " + userId.toString().toLong)
+		
+	
+		return userId.toString().toLong
+	} // End of generateRandomUser
+	
+	
+	// =================================================================================
+	//                           generateZombieOutbreak
+	//	
+	//    This function will generate the main zombie outbreak within a radius from the
+	//        longitude and latitude. You can have one main zombie outbreak with optional
+	//        secondary outbreaks. 
+	//
+	//    Secondary outbreaks will have a random number of zombies
+	//        from zero to sizeSecondayOutbreaks and the radius for these outbreaks will
+	//        be from zerro to firstRadiusKm
+	//
+	//    Main zombie outbreak
+	//        numberOfZombiesMainOutbreack - Integer for number of zombies
+	//        firstRadiusKm - Radius in kilometers for main zombie outbreak
+	//
+	//    Clusters of secondaru zombie outbreaks
+	//        numSecondaryOutbreaks - number of groups of zombies in secondary outbreaks
+	//        sizeSecondayOutbreaks - Indicate max number zombies in secondary outbreaks
+	//        secondaryRadius       - Size of radius from latitude and longitude entered above
+	//                                and should be larger than the firstRadiusKm
+	//   
+	
+	def generateZombieOutbreak(latitude:Double, longitude:Double, 
+	    numberOfZombiesMainOutbreack:Integer, firstRadiusKm:Double, 
+	    numSecondaryOutbreaks:Integer, sizeSecondayOutbreaks:Integer, secondaryRadius:Double) {
+	  
+	  
+		// Main outbreak
+		for(i <- 1 to numberOfZombiesMainOutbreack) {
+			var userId = generateRandomUser (latitude, longitude, firstRadiusKm, common.Globals.statusZombie)
+		}
+		
+		// Secondary outbreaks
+		if (numSecondaryOutbreaks > 0) {
+		  
+		    // Number of outbreaks
+			val outbreaks = Random.nextInt(numSecondaryOutbreaks)
+			for(i <- 1 to outbreaks) {
+				
+			    // Random size of the outbreak
+				var size = Random.nextInt(sizeSecondayOutbreaks)
+				var randomRadius = Random.nextDouble * firstRadiusKm
+				if (size > 0) {
+					var (latitudeSec, longitudeSec) = models.Geolocation.generateRandomLatitudeLongitudeWithinRadius(latitude, longitude, secondaryRadius)
+				  
+					for (s <-1 to size) {
+				  			  
+					    var userId = generateRandomUser (latitudeSec, longitudeSec, randomRadius, common.Globals.statusZombie)
+					}
+				}
+			} // End for outbreaks
+		} // End if numSecondaryOutbreaks
+	  
+	  
+	}  // End of generateZombieOutbreak
+	
 
 } // End of object Users
 	

@@ -58,25 +58,20 @@ object Application extends Controller {
     
     
     def test = Action {
+    	println("Start function test")
+           Users.generateRandomUser (27.123D, -127.456D, 1.0D, common.Globals.statusHuman)
+           Users.generateRandomUser (27.123D, -127.456D, 1.0D, common.Globals.statusZombie)
+           
+           Users.generateZombieOutbreak(37.123, -127.456, 100, 1.0, 3, 50, 3.0)
+           
       	println("Function test called")
-      	
-    	authenticate
-     
-    	Ok ("Function test")
+      	     
+    	Ok ("End of Function test")
     }
     
     def bearing = Action {      
       
-      
-    	println ("Random first name = " +  Users.generateRandomFirstName("m") ) 
-    	println ("Random first name = " +  Users.generateRandomFirstName("m") )
-    	println ("Random first name = " +  Users.generateRandomFirstName("m") )
-    	println ("Random first name = " +  Users.generateRandomFirstName("f") )
-    	println ("Random first name = " +  Users.generateRandomFirstName("f") )
-    	println ("Random first name = " +  Users.generateRandomFirstName("f") )
-    	
-    	println("Create user name   = " + Users.generateRandomUserName())
-    	println("Create user name   = " + Users.generateRandomUserName())
+  
       
       
     	var(latitude:Double, longitude:Double) = models.Geolocation.calculateNewLocationFromDistanceAndBearing(37.386052, -122.083851, 1.0, 0)
@@ -84,7 +79,7 @@ object Application extends Controller {
     	println("Latitide  = " + latitude)
     	println("Longitude = " + longitude)
     	
-      Ok
+      Ok("Function - bearing")
     }
     
     def distance = Action {

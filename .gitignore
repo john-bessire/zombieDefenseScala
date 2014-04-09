@@ -1,9 +1,11 @@
 *.class
 *.log
+*.target
 logs
 project/project
 project/target
 .target
+.cache
 
 # sbt specific
 .cache/

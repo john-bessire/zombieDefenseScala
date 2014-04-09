@@ -109,19 +109,18 @@ object Geolocation {
 	    return earthRadius * c;
 
 	} // End of calculateDistanceBetweenTwoPoints
-	
 
 	
-
-	
-	
-	
-	def generateZombieOutbreak(numberOfZombiesMainOutbreack:Integer, firstRadiusKm:Double, 
-	    numSecondaryOutbreaks:Integer, sizeSecondayOutbreaks:Integer, secondaryRadius:Double) {
-	  
+	// =================================================================================
+	//                         generateRandomLatitudeLongitudeWithinRadius
+	//	
+	def generateRandomLatitudeLongitudeWithinRadius (latitude:Double, longitude:Double, radiusKm:Double): (Double, Double) = {
+		var bearing = Random.nextInt(360).toDouble * Random.nextDouble
+		var distanceKm = radiusKm * Random.nextDouble
 		
-	  
-	}
- 
+		var(lat2, lon2) =  models.Geolocation.calculateNewLocationFromDistanceAndBearing(latitude, longitude, distanceKm, bearing)
+		return (lat2, lon2)
+	} // End of generateRandomLatitudeLongitudeWithinRadius
+
   
 } // End of object Geolocation
