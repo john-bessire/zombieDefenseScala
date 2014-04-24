@@ -2,7 +2,6 @@
  
 # --- !Ups
 
-
 CREATE SEQUENCE user_id_seq;
 CREATE TABLE "users" (
 	id INTEGER NOT NULL DEFAULT nextval('user_id_seq'),
@@ -13,6 +12,7 @@ CREATE TABLE "users" (
 	email VARCHAR(254),
 	password VARCHAR(150),
 	livingStatus VARCHAR(25),
+	location GEOGRAPHY(Point,4326) NOT NULL,
 	latitude DOUBLE PRECISION,
 	longitude DOUBLE PRECISION,
 	PRIMARY KEY(id)

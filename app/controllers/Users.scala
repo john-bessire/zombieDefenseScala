@@ -19,6 +19,7 @@ import play.api.mvc.Controller
 import play.api.Play.current
 import anorm.SqlParser._
 import scala.util.Random
+import scala.io._
 
 import java.util.{Date}
 
@@ -51,7 +52,10 @@ object Users extends Controller {
 	    Json.toJson(usersJson)  	
 	    
 	    Ok(usersJson)
+
 	}
+	
+
   	
 	// =======================================================================
 	//                   byId
@@ -60,7 +64,7 @@ object Users extends Controller {
 	//
 	def byId(id: Long) = Action { implicit request =>
 	  
-	  	println("Users.byId: " + id)
+	  	println("======== Users.byId: " + id + " ================")
 	  
 	    User.userById(id) match { 
 	        case Some(user) => {
@@ -71,6 +75,7 @@ object Users extends Controller {
 	        case None => Ok(Json.obj("status" -> "None"))
 	    }
 	}
+	
 	
 
 	// =======================================================================
@@ -95,13 +100,6 @@ object Users extends Controller {
 	        var latitude:Double      = ((json \ "latitude").validate[Double]).getOrElse(-999) 
 	        var longitude:Double     = ((json \ "longitude").validate[Double]).getOrElse(-999)
 
-		
-
-	
-		        
-
-	        
-	       	        
 	        if (userName == error) {status = false; errorMessage = "Invalid user name"}
 	        if (email    == error) {status = false; errorMessage = "Invalid email address"}
 	        if (password == error) {status = false; errorMessage = "Invalid password"}
@@ -118,6 +116,7 @@ object Users extends Controller {
 		        }
 	        }
 
+	                
 	        // Check for valid email address
 	        if (status == true) {
 	        	var (statusEmail:Boolean, msgEmail:String) = checkValidEmailAddress(email)
@@ -126,7 +125,7 @@ object Users extends Controller {
 	            	errorMessage = msgEmail
 	            }
 	        }
-	        
+
 	        // Check for valid password
 	        if (status == true) {
 	            var (statusPassword:Boolean, msgPassword:String) = checkValidPassword(password)
@@ -135,7 +134,8 @@ object Users extends Controller {
 	            	errorMessage = msgPassword
 	            }         
 	        }     
-	        
+
+
 	        // Check for duplicate user name
 	        if (status == true) {
 	        	// Check for duplicate user name
@@ -146,6 +146,7 @@ object Users extends Controller {
 
     			}
 	        }
+       
 	        
 	        // Create the user
 	        if (status == true) {
@@ -173,9 +174,52 @@ object Users extends Controller {
 		}.getOrElse {
 			BadRequest("Expecting Json data")
 		}
-			
-		
+					
 	}  // End of createUser
+	
+	
+	// =======================================================================
+	//                       getAllUsersWithinRadius
+	//
+	//    Get all users within a circle x meters form a latitude and longitude
+	//
+	def getAllUsersWithinRadius = Action { implicit request =>
+	    request.body.asJson.map { json =>
+	        println("Users.getAllUsersWithinRadius - json: " + json)
+	        
+	        
+	        // TODO - Add error checking
+	        
+	        val error = "*^*Error*@*"
+	        var status:Boolean = true
+	        var errorMessage = ""	
+
+	        var livingStatus         = ((json \ "livingStatus").validate[String]).getOrElse(error)  
+	        var latitude:Double      = ((json \ "latitude").validate[Double]).getOrElse(-999) 
+	        var longitude:Double     = ((json \ "longitude").validate[Double]).getOrElse(-999)	
+	        var radiusMeters:Double  = ((json \ "radiusMeters").validate[Double]).getOrElse(-999)
+	        
+	        	        	        
+	        print ("\nwithin radius - Living Status  = " + livingStatus)
+	        print ("\nwithin radius - latitude       = " + latitude)
+	        print ("\nwithin radius - longitude      = " + longitude)
+	        print ("\nwithin radius - radius         = " + radiusMeters)
+	        println("\n\n")
+	        
+	        val users = User.userGetUsersWithinRadius(livingStatus, latitude, longitude, radiusMeters)
+
+        	val usersJson = Json.obj("users"	-> {users.map(user => convertUserToJson(user))})
+
+	        Json.toJson(usersJson)  	
+	        	        	        
+	        Ok(usersJson)
+	        
+		}.getOrElse {
+			BadRequest("Expecting Json data")
+		}
+	  
+	  
+	} // End of getAllUsersWithinRadius
 	
 		
 	def convertUserToJson(user: User): JsObject = {
@@ -319,13 +363,19 @@ object Users extends Controller {
 			    "Jim", "James", "Jessie", "Jon", "John", "Johnn", "Johnny", "Jaun", 
 			    "Bill", "Billy", "William", "Willard", 
 			    "Tom", "Thomas", "Tommy", "Timmy", 
+			    "Nick", "Neil",
 			    "Rick", "Ricky", "Ricardo")
 			    
 		    firstName =  guyFirstNames(Random.nextInt(guyFirstNames.length))
 		    	    
 		} else {  // Female first names
-			var womanFirstNames = Array("Anne", "Amy", "Cindy", "Shelly", "Merry", "Marie", "michelle", 
-			    "Jenifer", "Jessica", "Sharon", "Shelly", "Tina", "Tammy")
+			var womanFirstNames = Array("Anne", "Amy", 
+			    "Betty", 
+			    "Cindy", "Shelly", 	  
+			    "Jenifer", "Jessica", 			    
+			    "Merry", "Marie", "michelle", 
+			    "Sharon", "Shelly", "Sally",
+			    "Tina", "Tammy")
 			    
 			firstName =  womanFirstNames(Random.nextInt(womanFirstNames.length))	
 

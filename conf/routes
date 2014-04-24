@@ -8,22 +8,30 @@ GET     /                           controllers.Application.index
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               		controllers.Assets.at(path="/public", file)
 
-GET 	/test						controllers.Application.test
+GET     /users                  controllers.Users.listAllUsers
+POST    /users          		controllers.Users.createUser
+GET		/users/:id				controllers.Users.byId(id: Long)
+POST	/usersRadius			controllers.Users.getAllUsersWithinRadius
 
 POST    /createMap				controllers.Application.createMap
 GET     /location               controllers.Application.getLocation
 
-GET     /users                  controllers.Users.listAllUsers
-POST    /users          		controllers.Users.createUser
-GET		/users/:id				controllers.Users.byId(id: Long)
+# Temporary to try things out
+GET 	/test					controllers.Application.test
 
+# From original To Do List example and will be modified or deleted
 POST    /                           controllers.Application.submit
+
 
 GET     /bearing		controllers.Application.bearing
 GET		/distance       controllers.Application.distance
+
+# Oauth is under development and not ready for use
 GET 	/oauth			controllers.Application.authenticate
 
+# Twitter search is cirrently under development and not ready
 GET		/twitter		controllers.Application.twitter
+GET     /twitter4j      controllers.Application.twitter4j
 
 
 #GET /index controllers.Application.index(param1:String, param2:String)

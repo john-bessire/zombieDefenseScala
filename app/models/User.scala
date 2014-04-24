@@ -3,12 +3,13 @@ package models
 import java.util.Calendar
 import java.text.SimpleDateFormat
 import java.util.{Date}
-
 import play.api.db._
 import play.api.Play.current
-
 import anorm._
 import anorm.SqlParser._
+import java.awt.Point
+
+import scala.io._
 
 
 
@@ -24,6 +25,7 @@ case class User(
     latitude:     Double,
     longitude:    Double
 )
+
 
 object User {
   
@@ -43,9 +45,9 @@ object User {
 			  	User(id, created, lastActive, lastLogin, userName, email, password, livingStatus, latitude, longitude)
 	    }
 	}
-	
-	
-  
+
+
+ 
 	// =======================================================================
 	//                    userFindAll
 	//
@@ -54,13 +56,22 @@ object User {
 	//
 	def userFindAll: List[User] = {
 	  
-		println("Start findALL")
-		println("+++++ User = " + User+ " +++++")
+println("Start findALL")
+println("+++++ User = " + User + " +++++")
+
+		var sqlString = "SELECT id, created, last_active, last_login, user_name, email, password, livingStatus, latitude, longitude from users"
+
+		  
 	    DB.withConnection { implicit connection =>
-	      		SQL("""select * from "users" """	      	    
+	      		SQL(sqlString
+	      		//SQL("""select * from users"""	      	    
 	      	).as(User.userTableLayout *)
+
 	    }
+
 	}
+	
+	
 	
 	
 	// =======================================================================
@@ -96,12 +107,18 @@ object User {
 		
 	    var last_active:Date = created
 	    var last_login:Date  = created
-		println("userCreate2 - Created     = " + created)
-		println("userCreate2 - Last Login  = " + last_active)
-		println("userCreate2 - Last login  = " + last_login)		
+		println("userCreate2 - Created       = " + created)
+		println("userCreate2 - user_name     = " + user_name)
+		println("userCreate2 - email         = " + email)
+		println("userCreate2 - password      = " + password)
+		println("userCreate2 - livingStatus  = " + livingStatus)
+		println("userCreate2 - latitude      = " + latitude)
+		println("userCreate2 - longitude     = " + longitude)
+						
+		val location = "ST_GeomFromText('POINT(" + longitude + " " +  latitude + ")', 4326)"
 		
 		val sqlString = 
-  			"INSERT INTO users (created, last_active, last_login, user_name, email, password, livingstatus, latitude, longitude ) " +
+  			"INSERT INTO users (created, last_active, last_login, user_name, email, password, livingstatus, location, latitude, longitude ) " +
 	      			"VALUES ( '" + created + "', '" +
                     last_active + "', '" +
                     last_login + "', '" + 
@@ -109,23 +126,27 @@ object User {
                     email + "', '" +
                     password + "', '" +
                     livingStatus + "', " +
+                    location + "," + 
                     latitude + ", " +
                     longitude + ")"
                     
 		println("SQL = " + sqlString)
+		
 				
 		DB.withConnection { implicit connection =>
 	      	SQL(
 	      	    sqlString
 	      	    
-	      	    /*
-	      	     * TODO - Getting errors from created, last_active and last_login
+	      	    
+	      	   //   TODO - Getting errors from created, last_active and last_login
+	      	   /*
      			"""
-	      			INSERT INTO users (created, last_active, last_login, user_name, email, password, livingstatus, latitude, longitude ) 
-	      			VALUES ({created},{last_active},{last_login}, {userName}, {email}, {password}, {livingStatus}, {latitude}, {longitude})
+	      			INSERT INTO users (created, last_active, last_login, user_name, email, password, livingstatus, locstion, latitude, longitude ) 
+	      			VALUES ({created},{null},{null}, {null}, {email}, {password}, {livingStatus}, {location}, {latitude}, {longitude})
 	      	    """	 
 	      	    * 
-	      	    */     	
+	      	    */
+   	
       		).on(
       			'userName      -> user.userName,
       			'email 	       -> user.email,
@@ -143,6 +164,40 @@ object User {
     	 
 	} // End - userCreate
 	
+	
+	// =======================================================================
+	//                userGetUsersWithinRadius
+	//
+	def userGetUsersWithinRadius(livingStatus:String, latitude:Double, longitude:Double, radiusMeters:Double): List[User] = {
+	  
+		var lStatus = ""
+		
+		// SQL to get all users or just get human, zombies and other.  
+		if (livingStatus != common.Globals.statusAll) {
+			lStatus = " and livingstatus = '" + livingStatus + "'"
+		}
+	  	  	  
+		var sqlString = "select * from users " + 
+	      			"where st_dWithin(location,'SRID=4326;POINT(" + longitude + " " + latitude + ")', " + radiusMeters + ")" + lStatus
+
+		println("++++++++++ SQL = " + sqlString)
+	      			
+		DB.withConnection { implicit connection =>
+	      	SQL(	
+	      	    sqlString
+	      	    /*
+      			"""select *
+	      			from users
+	      			where st_dWithin(location,'SRID=4326;POINT({longitude} {latitude})', {radiusMeters});
+	      	    """ 
+	      	    * 
+	      	    */    	    
+  			).as(User.userTableLayout *)
+      		
+    	} 		  	  
+	} // End of userGetUsersWithinRadius
+	
+	
 	// =======================================================================
 	//                  doesDatabaseValueExistInTable
 	//
@@ -153,7 +208,7 @@ object User {
 		var valueExist = false;
 		
 		val sqlString = "SELECT * FROM " + tableName + " WHERE " + columnName + " = '" + value + "'"
-		//println("Sql String = " + sqlString)
+println("Sql String = " + sqlString)
 	  
 		var results = DB.withConnection { implicit connection =>
 		  	SQL (
@@ -163,6 +218,8 @@ object User {
 		
 		if (results.size >= 1) { valueExist = true}
 
+println("==== Finished checking id user name exists")		
+		
 		return valueExist
 	  
 	} // End of doesDatabaseValueExistInTable

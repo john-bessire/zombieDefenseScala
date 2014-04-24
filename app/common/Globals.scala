@@ -2,9 +2,10 @@ package common
 
 object Globals {
  
-	val statusHuman   = "human"
-	val statusZombie  = "zombie"
-	val statusUnknown = "unknown"  // Badly injured and could change
+	val statusAll     = "all"      // Used to search for all living and undead users
+	val statusHuman   = "human"    // If you can read this then you are still human
+	val statusZombie  = "zombie"   // Smarter than the average cell phone user
+	val statusUnknown = "unknown"  // Badly injured and could change into a zombie
 	val statusMissing = "missing"  // Missing or turned into a zombie
 	val statusRandom  = "random"   // Generate random person, zombie, missing, unknow
   

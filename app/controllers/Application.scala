@@ -14,7 +14,15 @@ import play.api.libs.oauth._
 import play.mvc.Results.Redirect
 
 
+import twitter4j.TwitterFactory
+import twitter4j.Twitter
+import twitter4j.conf.ConfigurationBuilder
+
 object Application extends Controller {
+  
+  
+	// TODO - Most of this page is code under development that will be
+    // deleted or moved elsewhere. 
   
   
     val form = Form(
@@ -46,6 +54,20 @@ object Application extends Controller {
       
     	Ok("Function auth")
     }
+    
+    
+    def twitter4j = Action {
+      
+ 
+    	println("Twitter4j")
+      
+    	Ok("Twitter4j library")
+    }
+    
+    
+
+    
+
     
     
     def twitter = Action { implicit request => 
@@ -129,6 +151,8 @@ object Application extends Controller {
 	  
 
 def authenticate = Action { request =>
+  
+  /*
     request.getQueryString("oauth_verifier").map { verifier =>
       val tokenPair = sessionTokenPair(request).get
       // We got the verifier; now get the access token, store it and back to index
@@ -156,6 +180,10 @@ def authenticate = Action { request =>
         }
         case Left(e) => throw e
       })
+      * 
+      * 
+      */
+  	Ok("Authenticate")
   }
 
   def sessionTokenPair(implicit request: RequestHeader): Option[RequestToken] = {
