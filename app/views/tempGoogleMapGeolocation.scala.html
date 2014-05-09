@@ -1,0 +1,38 @@
+@(title: String)(body:String)(zombies:List[models.User])
+@import helper._
+@import play.api.libs.json.Json
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>@title </title>
+ 
+    </head>
+    <body>
+		@body
+		@zombies
+	
+		
+		<ul> 
+			@for(zombie <- zombies) {
+				</br>
+		
+				<li>@zombie.id</li>
+				<li>@zombie.email</li>
+				<li>@zombie.userName </li>
+				<li>@zombie.email </li>
+				<li>@zombie.password </li>
+				<li>@zombie.livingStatus </li>
+				<li>@zombie.latitude </li>
+				<li>@zombie.longitude </li>
+	
+			} 
+		</ul>
+ 
+    </body>
+</html>
+
+
+
+

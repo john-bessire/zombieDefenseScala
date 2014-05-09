@@ -22,8 +22,8 @@ object Application extends Controller {
   
   
 	// TODO - Most of this page is code under development that will be
-    // deleted or moved elsewhere. 
-  
+    // deleted or moved elsewhere. Project currently consists of API calls
+    // and web page displays have not been created yet.
   
     val form = Form(
 	    tuple(
@@ -40,68 +40,21 @@ object Application extends Controller {
 		println("Body =    " + request.body)
 	
     //def index(token:String, secret:String) = Action { 
-
-
 	      
 		// println ("Action Index")
 		// Ok(views.html.index())
 	    Ok("Index page")  
     }
     
-    def auth = Action {implicit request => 
-  	  	println("Headers = " + request.headers)
-		println("Body =    " + request.body)
-      
-    	Ok("Function auth")
-    }
-    
-    
-    def twitter4j = Action {
-      
- 
-    	println("Twitter4j")
-      
-    	Ok("Twitter4j library")
-    }
-    
-    
-
-    
-
-    
-    
-    def twitter = Action { implicit request => 
-	  	println("Headers = " + request.headers)
-		println("Body =    " + request.body)
-
-	    Ok("Redirect form Twitter")      
-      
-    }
-    
-    
-    def test = Action {
-    	println("Start function test")
-           Users.generateRandomUser (27.123D, -127.456D, 1.0D, common.Globals.statusHuman)
-           Users.generateRandomUser (27.123D, -127.456D, 1.0D, common.Globals.statusZombie)
-           
-           Users.generateZombieOutbreak(37.123, -127.456, 100, 1.0, 3, 50, 3.0)
-           
-      	println("Function test called")
-      	     
-    	Ok ("End of Function test")
-    }
-    
+     
     def bearing = Action {      
-      
-  
-      
       
     	var(latitude:Double, longitude:Double) = models.Geolocation.calculateNewLocationFromDistanceAndBearing(37.386052, -122.083851, 1.0, 0)
   
     	println("Latitide  = " + latitude)
     	println("Longitude = " + longitude)
     	
-      Ok("Function - bearing")
+      Ok("Bearing and direction start lat/lon = ")
     }
     
     def distance = Action {
@@ -114,9 +67,9 @@ object Application extends Controller {
  
     	println("Distance = " + distance)
     	
-    	Ok("Distance")
-    }
+    	Ok("Distance = %f".format(distance))
     
+    }
   
   def submit = Action { implicit request =>
 		val (fname, lname) = form.bindFromRequest.get
@@ -125,6 +78,8 @@ object Application extends Controller {
 
 
     def createMap = Action {
+      
+    
     	println("Action - Create map")
     	Ok  // Todo add create map code
     }
@@ -133,7 +88,6 @@ object Application extends Controller {
 	  println("Get Location called")  
 	  
 	  Geolocation.getLatitudeAndLongitudeFromAddress("Mountain View, Ca")
-
       
       println("After function called to get longitide and latitude")
       Ok("Done") // TODO - do someyhing here

@@ -16,8 +16,13 @@ POST	/usersRadius			controllers.Users.getAllUsersWithinRadius
 POST    /createMap				controllers.Application.createMap
 GET     /location               controllers.Application.getLocation
 
+GET		/index                  controllers.Application.index
+
 # Temporary to try things out
-GET 	/test					controllers.Application.test
+GET 	/temp1					controllers.underDevelopment.temp1
+GET		/temp2                  controllers.underDevelopment.temp2
+GET	    /temp3                  controllers.underDevelopment.temp3
+
 
 # From original To Do List example and will be modified or deleted
 POST    /                           controllers.Application.submit
@@ -30,8 +35,10 @@ GET		/distance       controllers.Application.distance
 GET 	/oauth			controllers.Application.authenticate
 
 # Twitter search is cirrently under development and not ready
-GET		/twitter		controllers.Application.twitter
-GET     /twitter4j      controllers.Application.twitter4j
+GET		/twitter		controllers.underDevelopment.twitter
+GET     /twitter4j      controllers.underDevelopment.twitter4j
+
+
 
 
 #GET /index controllers.Application.index(param1:String, param2:String)
