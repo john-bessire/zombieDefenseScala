@@ -1,38 +1,106 @@
 @(title: String)(body:String)(zombies:List[models.User])
 @import helper._
 @import play.api.libs.json.Json
+@import play.api.mvc._
 
 <!DOCTYPE html>
 
 <html>
     <head>
         <title>@title </title>
- 
-    </head>
-    <body>
-		@body
-		@zombies
+	    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+	    <meta charset="utf-8">
+	    <style>
+	      	html, body, #map-canvas {
+		        height: 300px;
+		        width: 1000px;
+		        margin: 0px;
+		        padding: 0px
+	      	}
+	    </style>
+	    
+	    
+	    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+
+	    <script>
+					var map;
+
+
+					function addMarker(userName, latitude, longitude) {
+					
+							console.log("Add marker name      = " + userName)
+							console.log("Add marker latitude  = " + latitude)
+							console.log("Add marker longitude = " + longitude)
+					
+							var position = new google.maps.LatLng(latitude, longitude);
+									marker = new google.maps.Marker({
+							        position: position,
+							        map: map,
+							        title: userName
+							});
+					
+					}
+
+					function initialize() {
+					
+							console.log ("Function initialize called")
+					  	var mapOptions = {
+					   	 	zoom: 12,
+					   	 	center: new google.maps.LatLng(36.165449, -115.143156)
+					  	};
+					  	
+							map = new google.maps.Map(document.getElementById('map-canvas'),
+					      	mapOptions);
+					      	
+					    addMarker("test1", 36.165449, -115.143156);
+					    addMarker("test2", 36.165449, -115.149156);					
+					}
+
+
+
+			//google.maps.event.addDomListener(window, 'load', initialize);
+
+    	</script>
+		</head>
 	
-		
-		<ul> 
-			@for(zombie <- zombies) {
-				</br>
-		
-				<li>@zombie.id</li>
-				<li>@zombie.email</li>
-				<li>@zombie.userName </li>
-				<li>@zombie.email </li>
-				<li>@zombie.password </li>
-				<li>@zombie.livingStatus </li>
-				<li>@zombie.latitude </li>
-				<li>@zombie.longitude </li>
+		<body>
+				<div id="map-canvas"></div>
+
+				@zombies
+
+				<script> initialize(); </script>
+
+				<button onclick="addMarker('test4', 36.165449, -115.132156)">Fourth marker</button>
 	
-			} 
-		</ul>
- 
+				<script>
+						addMarker("test3", 36.165449, -115.138156);
+				</script>
+		
+				<ul> 
+						@for(zombie <- zombies) {
+								</br>
+						
+								<li>@zombie.id</li>
+								<li>@zombie.email</li>
+								<li>@zombie.userName </li>
+								<li>@zombie.email </li>
+								<li>@zombie.password </li>
+								<li>@zombie.livingStatus </li>
+								<li>@zombie.latitude </li>
+								<li>@zombie.longitude </li>
+								
+								<script> 
+			
+										console.log("Javascript user name = " + "@zombie.userName" + ", " + @zombie.latitude + ", " + @zombie.longitude);
+								</script>
+								
+								<script> addMarker("@zombie.userName", "@zombie.latitude", "@zombie.longitude"); </script>
+				
+			
+						} 
+				</ul>
     </body>
 </html>
-
 
 
 

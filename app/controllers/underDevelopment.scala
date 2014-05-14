@@ -61,19 +61,13 @@ object underDevelopment  extends Controller  {
 	    )
 	)
     
-      def temp1 = Action {  // Generate zombie outbreaks.
+	def temp1 = Action {  // Generate zombie outbreaks.
                   
-	  println("Generate zombie outbreak")
-   	
-           Users.generateRandomUser (27.123D, -127.456D, 1.0D, common.Globals.statusHuman)
-           Users.generateRandomUser (27.123D, -127.456D, 1.0D, common.Globals.statusZombie)
-           
-           Users.generateZombieOutbreak(37.123, -127.456, 100, 1.0, 3, 50, 3.0)
-           
-           
-           
-     	
-      	Ok("temp 1")
+	     println("Generate zombie outbreak")
+	     
+           //Users.generateZombieOutbreak(36.165449, -115.143156, 100, 1.0, 3, 50, 3.0)
+
+      	Ok("temp1")
     }
 
 
@@ -94,7 +88,7 @@ object underDevelopment  extends Controller  {
     	val today = Calendar.getInstance().getTime()
     	val sdf = new SimpleDateFormat("EEEEE MMMMM m, k:m:s")
 
-    	var zombies = models.User.userGetUsersWithinRadius(common.Globals.statusZombie, 37.123, -127.456,1000.0)
+    	var zombies = models.User.userGetUsersWithinRadius(common.Globals.statusZombie, 36.165449, -115.1431566,1000.0)
     	
     	println(zombies)
       
