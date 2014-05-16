@@ -30,3 +30,4 @@ project/plugins/project/
 /.project
 /RUNNING_PID
 /.settings
+/bin

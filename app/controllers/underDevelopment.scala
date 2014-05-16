@@ -17,38 +17,7 @@ import common.ErrorHandling
 import play.api.libs.oauth._
 import play.mvc.Results.Redirect
 import twitter4j._
-import scala.collection.mutable.HashMap
-import play.api.libs.json.Json
 
-
-object Util {
-    val config = new twitter4j.conf.ConfigurationBuilder()
-	    .setOAuthConsumerKey("1HNZuoq17HmGHCkwl4flg")
-	    .setOAuthConsumerSecret("uVsFvXopnTn6LrSqUNfOEqCI0Xk2eMNQDFLEXKe6I")
-	    .setOAuthAccessToken("18912024-ZpKVxobPp9UtOI8LvWEYCSXldQf4PiKMvSVGBTPFw")
-	    .setOAuthAccessTokenSecret("R80fxNsLXjMEBjtwDy2FfBTKMMQCswLWs9MvHPKpg")
-	    .build
-    
-	def simpleStatusListener = new StatusListener() {
-    	def onStatus(status: Status) { println(status.getText) }
-		def onDeletionNotice(statusDeletionNotice: StatusDeletionNotice) {}
-		def onTrackLimitationNotice(numberOfLimitedStatuses: Int) {}
-		def onException(ex: Exception) { ex.printStackTrace }
-		def onScrubGeo(arg0: Long, arg1: Long) {}
-		def onStallWarning(warning: StallWarning) {}
-	}
-}
-
-object StatusStreamer {
-  def main(args: Array[String]) {
-    val twitterStream = new TwitterStreamFactory(Util.config).getInstance
-    twitterStream.addListener(Util.simpleStatusListener)
-    twitterStream.sample
-    Thread.sleep(2000)
-    twitterStream.cleanUp
-    twitterStream.shutdown
-  }
-}
 
 object underDevelopment  extends Controller  {
   
@@ -98,15 +67,14 @@ object underDevelopment  extends Controller  {
 
     	val colors = Map("red" -> "#FF0000", "azure" -> "#F0FFFF")
 
-    	var tempJson = Json.obj(
-    			"name" -> "bob",
-    			"age" -> 42
-    	)
     	
     	Ok(views.html.tempGoogleMapGeolocation.render(temp1, temp2, zombies ))
 
-     	//Ok(temp)
- 
+    }
+    
+    def oauth = {
+      
+		controllers.Twitter.authenticate
     }
        
     def auth = Action {implicit request => 
@@ -117,20 +85,56 @@ object underDevelopment  extends Controller  {
     }
     
     
-    def twitter4j = Action {
- 
-    	println("Twitter4j")
-      
-    	Ok("Twitter4j library")
-    }
-       
-    
-    def twitter = Action { implicit request => 
-	  	println("Headers = " + request.headers)
-		println("Body =    " + request.body)
+} // End of object Under Development
 
-	    Ok("Redirect form Twitter")      
-      
+
+
+object Twitter extends Controller {
+ 
+	    //.setOAuthConsumerKey("1HNZuoq17HmGHCkwl4flg")
+	    //.setOAuthConsumerSecret("uVsFvXopnTn6LrSqUNfOEqCI0Xk2eMNQDFLEXKe6I")
+	    //.setOAuthAccessToken("18912024-ZpKVxobPp9UtOI8LvWEYCSXldQf4PiKMvSVGBTPFw")
+	    //.setOAuthAccessTokenSecret("R80fxNsLXjMEBjtwDy2FfBTKMMQCswLWs9MvHPKpg")
+
+  val KEY = ConsumerKey("1HNZuoq17HmGHCkwl4flg", "uVsFvXopnTn6LrSqUNfOEqCI0Xk2eMNQDFLEXKe6I")
+
+  val TWITTER = OAuth(ServiceInfo(
+    "https://api.twitter.com/oauth/request_token",
+    "https://api.twitter.com/oauth/access_token",
+    "https://api.twitter.com/oauth/authorize", KEY),
+    false)
+
+  def authenticate = Action { request =>
+    request.queryString.get("oauth_verifier").flatMap(_.headOption).map { verifier =>
+      val tokenPair = sessionTokenPair(request).get
+      // We got the verifier; now get the access token, store it and back to index
+      TWITTER.retrieveAccessToken(tokenPair, verifier) match {
+        case Right(t) => {
+          // We received the authorized tokens in the OAuth object - store it before we proceed
+          Redirect(routes.Application.index).withSession("token" -> t.token, "secret" -> t.secret)
+        }
+        case Left(e) => throw e
+      }
+    }.getOrElse(
+      TWITTER.retrieveRequestToken("http://localhost:9000/auth") match {
+        case Right(t) => {
+          // We received the unauthorized tokens in the OAuth object - store it before we proceed
+          Redirect(TWITTER.redirectUrl(t.token)).withSession("token" -> t.token, "secret" -> t.secret)
+        }
+        case Left(e) => throw e
+      })
+  }
+
+  def sessionTokenPair(implicit request: RequestHeader): Option[RequestToken] = {
+    for {
+      token <- request.session.get("token")
+      secret <- request.session.get("secret")
+    } yield {
+      RequestToken(token, secret)
     }
-    
-}
+  }
+} // End of object Twitter
+
+
+
+

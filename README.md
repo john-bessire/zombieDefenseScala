@@ -23,7 +23,7 @@ Last year a created a repository called ZombieDefence to practice Ruby on Rails.
 
 ###API calls###
 
-##Get all users##
+####Get all users####
 
   curl \
 	--header "Content-type: application/json" \
@@ -32,7 +32,7 @@ Last year a created a repository called ZombieDefence to practice Ruby on Rails.
 	localhost:9000/users \
 	| python -mjson.tool
 	
-##Get user by ID##
+####Get user by ID####
 
   curl \
 	--header "Content-type: application/json" \
@@ -41,7 +41,7 @@ Last year a created a repository called ZombieDefence to practice Ruby on Rails.
 	localhost:9000/users/1 \
 	| python -mjson.tool
 	
-##Create user##
+####Create user####
 
   curl \
 	--header "Content-type: application/json" \
@@ -50,7 +50,7 @@ Last year a created a repository called ZombieDefence to practice Ruby on Rails.
 	localhost:9000/users \
 	| python -mjson.tool
 
-##Get all users within x meters from latitude and longitude## 
+####Get all users within x meters from latitude and longitude#### 
 Living Status is (human, zombie, unknown, missing).  Unknown status is when a person is badly injured and could turn into a zombie or get better.
 
   curl \

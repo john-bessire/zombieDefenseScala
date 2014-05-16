@@ -13,8 +13,8 @@ POST    /users          		controllers.Users.createUser
 GET		/users/:id				controllers.Users.byId(id: Long)
 POST	/usersRadius			controllers.Users.getAllUsersWithinRadius
 
-POST    /createMap				controllers.Application.createMap
 GET     /location               controllers.Application.getLocation
+
 
 GET		/index                  controllers.Application.index
 
@@ -23,25 +23,10 @@ GET 	/temp1					controllers.underDevelopment.temp1
 GET		/temp2                  controllers.underDevelopment.temp2
 GET	    /temp3                  controllers.underDevelopment.temp3
 
-
-# From original To Do List example and will be modified or deleted
-POST    /                           controllers.Application.submit
-
-
 GET     /bearing		controllers.Application.bearing
 GET		/distance       controllers.Application.distance
 
-# Oauth is under development and not ready for use
-GET 	/oauth			controllers.Application.authenticate
-
-# Twitter search is cirrently under development and not ready
-GET		/twitter		controllers.underDevelopment.twitter
-GET     /twitter4j      controllers.underDevelopment.twitter4j
-
-
-
-
-#GET /index controllers.Application.index(param1:String, param2:String)
+GET     /auth          controllers.Twitter.authenticate
 
 
 
