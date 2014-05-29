@@ -31,8 +31,8 @@ object Application extends Controller {
 	//def index = Action { implicit request =>
 	
 	def index = Action {
-	
-	    Ok("Index page")  
+      
+	    Ok(views.html.index.render)  
     }
     
      
@@ -65,7 +65,15 @@ object Application extends Controller {
 	def getLocation = Action {
 		println("Get Location called")  
 	  	
-		Geolocation.getLatitudeAndLongitudeFromAddress("Mountain View, Ca")
+		//Geolocation.getLatitudeAndLongitudeFromAddress("Mountain View, Ca")
+		//Geolocation.getLatitudeAndLongitudeFromAddress("When in New York city we stopped at Central Park")
+		//Geolocation.getLatitudeAndLongitudeFromAddress("We went hiking at yosemite")
+		//Geolocation.getLatitudeAndLongitudeFromAddress("Lunch will be at 600 Montgomery St, San Francisco, CA tomorrow")
+		
+		
+		
+		
+		Geolocation.getLatitudeAndLongitudeFromAddress("On my visit to New York City, New York we were surrounded zombies")
 	  
 		println("After function called to get longitide and latitude")
 		Ok("Done") // TODO - do someyhing here
